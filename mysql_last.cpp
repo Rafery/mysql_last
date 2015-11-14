@@ -21,6 +21,7 @@ public:
 		cout<<"1.student login"<<endl;
 		cout<< ">>";
 	}
+
 	void login() {
 		cout<<"userId:";
 		cin>>userId;
@@ -46,6 +47,7 @@ public:
 			login();
 		}
 	}
+
 	void studentMenu() {
 		time_t timer;
 		time(&timer);
@@ -91,6 +93,7 @@ public:
 			switch(choose) {
 			case 1:
 				cout<<"Transcript"<<endl;
+				transcript();
 				pass = false;
 				break;
 			case 2:
@@ -115,11 +118,89 @@ public:
 			}
 		}
 	}
+
+	void transcript(){
+        mysql_real_connect(conn, "localhost", "root", "103103", "project3-nudb", 0, NULL, 0);
+        char* sql = new char[200];
+        sprintf(sql, "select UoSCode, Grade, UoSName from transcript inner join unitofstudy "
+                "using(UoSCode) where studid = %d;", userId);
+        int status = mysql_query(conn,sql);
+        if(status){
+            cout << "cannot connet to the mysql server";
+            mysql_close(conn);
+            exit(0);
+        }
+        MYSQL_RES *res_set;
+        MYSQL_ROW row;
+        res_set = mysql_store_result(conn);
+        int numrows = (int)mysql_num_rows(res_set);
+        for (int i = 0; i < numrows; i++) {
+            row = mysql_fetch_row(res_set);
+            if (row != NULL) {
+                cout << "Course Id : " << row[0];
+                if (row[1]) {
+                    cout << " Course Name: " << row[2] << " Grade: " << row[1] << endl;
+                } else {
+                    cout << " Course Name: " << row[2] << " Grade: null" << endl;
+                }
+            }
+        }
+        //mysql_close(conn);
+        int choose;
+        while(1){
+            cout<<"1.go back to student menu"<<endl;
+            cout<<"2.check details of a course"<<endl;
+            cout<< ">>";
+            cin>>choose;
+            if(choose == 1){
+                studentMenu();
+                break;
+            } else if (choose == 2){
+                cout << "please enter the course number: ";
+                cin >> courseNum;
+                sprintf(sql, "select transcript.uoscode, unitofstudy.uosname, "
+                        "transcript.year, transcript.semester, uosoffering.enrollment, "
+                        "uosoffering.maxenrollment, faculty.name, transcript.grade "
+                        "from transcript inner join unitofstudy using(UoSCode) "
+                        "inner join uosoffering on transcript.uoscode = uosoffering.uoscode "
+                        "and transcript.year = uosoffering.year inner join faculty "
+                        "on faculty.id = uosoffering.instructorid "
+                        "where transcript.studid = %d and transcript.uoscode = \"%s\";", userId, courseNum);
+                status = mysql_query(conn,sql);
+                if(status){
+                    cout << "course number might be wrong" << endl;
+                    continue;
+                }
+                res_set = mysql_store_result(conn);
+                row = mysql_fetch_row(res_set);
+                if (!row){
+                    cout << "this course does not exist" << endl;
+                    continue;
+                }
+                cout << "couse number: " << row[0] << " course title: " << row[1];
+                cout << " year : " << row[2] << " quarter :" << row[3];
+                cout << " number of enrolled students: " << row[4];
+                cout << " maximun enrolled students: " << row[5];
+                cout << " lectuer name: " << row[6];
+                if(row[7]){
+                    cout << "grade: " << row[7] << endl;
+                } else {
+                    cout << "grade: null" << endl;
+                }
+                //mysql_close(conn);
+            } else {
+                cout << "please enter the right number" << endl;
+            }
+        }
+    }
+
 	void Enroll() {
 
 	}
+
 private:
 	int userId;
+	char courseNum[10];
 	char password[10];
 	int getQuarter(int day, int month) {
 		if (month >= 9 && month <= 12) {
@@ -150,6 +231,7 @@ private:
 		return 4;
 	}
 };
+
 int _tmain(int argc, _TCHAR* argv[])
 {
 	show rafe;
