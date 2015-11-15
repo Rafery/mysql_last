@@ -1,12 +1,12 @@
-// mysql_last.cpp : 定义控制台应用程序的入口点。
-//
 #include <mysql.h>
 #include <iostream>
 #include <string>
 #include <time.h>
 typedef unsigned int SOCKET;
 #ifndef my_socket_defined
+
 #define my_socket SOCKET
+
 #endif
 #include "mysql.h"
 using namespace std;
@@ -27,7 +27,7 @@ public:
         char* combine = new char[100];
         sprintf(combine,"SELECT * FROM student WHERE Id = %d AND Password = '%s';", userId, password);
         conn = mysql_init ( NULL );
-        mysql_real_connect(conn, "localhost", "root", "103103", "project3-nudb", 0, NULL, 0);
+        mysql_real_connect(conn, "localhost", "root", "19930104", "project3-nudb", 0, NULL, 0);
         MYSQL_RES *res_set;
         MYSQL_ROW row;
         mysql_query(conn,combine);//return int; 0 is true, 1 is false
@@ -35,97 +35,29 @@ public:
         int numrows = (int)mysql_num_rows(res_set);
         mysql_free_result( res_set );
         mysql_close( conn );
-        int result = 0;
         if (numrows == 1) {
             cout<<"login successful"<<endl;
-            result = studentMenu();
-            while(result){
-                result = studentMenu();
-            }
+            studentMenu();
         } else {
-            cout<<"login failure!"<<endl;
-            cout<<"please login again..."<<endl;
+            cout<<"login failure"<<endl;
+            cout<<"please login again"<<endl;
             login();
         }
     }
 
-    int studentMenu() {
+    void studentMenu() {
         time_t timer;
         time(&timer);
         tm* t_tm = localtime(&timer);
         int year = t_tm->tm_year + 1900;
         int month = t_tm->tm_mon + 1;
         int day = t_tm->tm_mday;
-        int quarter = getQuarter(day,month);
-        char* combine = new char[200];
-        sprintf(combine,"SELECT UoSCode, UoSName FROM unitofstudy join transcript using(UoSCode)  WHERE StudId = %d AND Grade is null;", userId);
-        conn = mysql_init ( NULL );
-        mysql_real_connect(conn, "localhost", "root", "103103", "project3-nudb", 0, NULL, 0);
-        MYSQL_RES *res_set;
-        MYSQL_ROW row;
-        int a = mysql_query(conn,combine);//return int; 0 is true, 1 is false
-
-        res_set = mysql_store_result(conn);
-        int numrows = (int)mysql_num_rows(res_set);
-        // Display results
-        cout<<"UoSCode:     "<<"UoSName: "<<endl;
-        for (int i = 0; i < numrows; i++)
-        {
-            row = mysql_fetch_row( res_set );
-            if( row != NULL )
-            {
-                cout << row[0] <<"     "<< row[1] << endl;
-            }
-        }
-        // free resources
-        mysql_free_result( res_set );
-        mysql_close( conn );
-        cout<<"Options:"<<endl;
-        cout<<"1.Transcript"<<endl;
-        cout<<"2.Enroll"<<endl;
-        cout<<"3.Withdraw"<<endl;
-        cout<<"4.Personal Details"<<endl;
-        cout<<"5.Logout"<<endl;
-        bool pass = true;
-        while (pass){
-            cout<< ">>";
-            int choose;
-            cin>>choose;
-            if (cin.fail()) {
-                cin.clear();
-                while(cin.get() != '\n');
-            }
-            int result = 0;
-            switch(choose) {
-                case 1:
-                    cout<<"Transcript"<<endl;
-                    result = transcript();
-                    return result;
-                case 2:
-                    cout<<"Enroll"<<endl;
-                    pass = false;
-                    break;
-                case 3:
-                    cout<<"Withdraw"<<endl;
-                    pass = false;
-                    break;
-                case 4:
-                    cout<<"Personal Details"<<endl;
-                    pass = false;
-                    break;
-                case 5:
-                    cout<<"Logout"<<endl;
-                    pass = false;
-                    break;
-                default:
-                    cout<<"unidentified selection"<<endl;
-                    break;
-            }
-        }
+        cout<<year<<" "<<month<<" "<<day << endl;
+        //int quarter = getQuarter(day,month);
     }
 
     int transcript(){
-        mysql_real_connect(conn, "localhost", "root", "103103", "project3-nudb", 0, NULL, 0);
+        mysql_real_connect(conn, "localhost", "root", "19930104", "project3-nudb", 0, NULL, 0);
         char* sql = new char[200];
         sprintf(sql, "select UoSCode, Grade, UoSName from transcript inner join unitofstudy "
                 "using(UoSCode) where studid = %d;", userId);
@@ -151,22 +83,17 @@ public:
             }
         }
         //mysql_close(conn);
-        while(1) {
-            cout << "1.go back to student menu" << endl;
-            cout << "2.check details of a course" << endl;
-            cout << ">>";
-            int chooseTrans;
-            cin >> chooseTrans;
-            if (cin.fail()) {
-                cout << "invalid input " << endl;
-                cin.clear();
-                while(cin.get() != '\n');
-            }
-            if(chooseTrans == 1){
-                //mysql_free_result(res_set);
-                //mysql_close(conn);
+        int choose;
+        while(1){
+            cout<<"1.go back to student menu"<<endl;
+            cout<<"2.check details of a course"<<endl;
+            cout<< ">>";
+            cin>>choose;
+            if(choose == 1){
+                mysql_free_result(res_set);
+                mysql_close(conn);
                 return 1;
-            } else if (chooseTrans == 2){
+            } else if (choose == 2){
                 cout << "please enter the course number: ";
                 cin >> courseNum;
                 sprintf(sql, "select transcript.uoscode, unitofstudy.uosname, "
@@ -204,42 +131,10 @@ public:
         }
     }
 
-    void Enroll() {
-
-    }
-
 private:
     int userId;
     char courseNum[10];
     char password[10];
-    int getQuarter(int day, int month) {
-        if (month >= 9 && month <= 12) {
-            return 1;
-        }
-        if (month >= 1 && month <= 2) {
-            return 2;
-        }
-        if (month == 3) {
-            if (day <= 26 && day >= 0) {
-                return 2;
-            }
-            if (day>=27 && day <= 31) {
-                return 3;
-            }
-        }
-        if (month >= 4 && month <= 5) {
-            return 3;
-        }
-        if (month = 6) {
-            if (day <= 19 && day >= 0) {
-                return 3;
-            }
-            if (day >= 20 && day<= 30) {
-                return 4;
-            }
-        }
-        return 4;
-    }
 };
 
 int main()
@@ -251,6 +146,7 @@ int main()
     if (choose == 1) {
         cout<<"next"<<endl;
         rafe.login();
+        rafe.transcript();
     }
 
     /*
@@ -266,6 +162,7 @@ int main()
         CLIENT_MULTI_RESULTS ); // flags (none)
     */
     // close connection
+    /*
     conn = mysql_init ( NULL );
     if(mysql_real_connect(conn, "localhost", "root", "103103", "project3-nudb", 0, NULL, 0))
         cout<<"success"<<endl;
@@ -288,4 +185,5 @@ int main()
     mysql_close( conn );
     system("pause");
     return 0;
+    */
 }
