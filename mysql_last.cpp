@@ -39,6 +39,10 @@ public:
     }
 
     int login() {
+        cout << "-------" << endl;
+        cout << "|Login|" << endl;
+        cout << "-------" << endl;
+        cout << endl;
         cout << "[Login] Please input your userId and password: "<< endl;
         cout<<"userId:";
         cin>>userId;
@@ -74,6 +78,10 @@ public:
     }
 
     int studentMenu() {
+        cout << "--------------" << endl;
+        cout << "|Student Menu|" << endl;
+        cout << "--------------" << endl;
+        cout << endl;
         time_t timer;
         time(&timer);
         tm* t_tm = localtime(&timer);
@@ -92,16 +100,16 @@ public:
         res_set = mysql_store_result(conn);
         int numrows = (int)mysql_num_rows(res_set);
         // Display results
-        cout<<"CourseID:  Grade:   "<<"CourseName: "<<endl;
+        cout<< left << setw(13) <<"CourseID:"<< left << setw(8) <<"Grade:" << left << setw(14)<< "CourseName:"<<endl;
         for (int i = 0; i < numrows; i++)
         {
             row = mysql_fetch_row( res_set );
             if( row != NULL )
             {
                 if (row[1] == NULL){
-                    cout << row[0] <<"   "<<"null"<<"     "<< row[2] << endl;
+                    cout << left << setw(13) << row[0] << left << setw(8) << "null" << row[2] << endl;
                 } else {
-                    cout << row[0] <<"   "<<row[1]<<"        "<< row[2] << endl;
+                    cout << left << setw(13) << row[0] << left << setw(8) << row[1] << row[2] << endl;
                 }
             }
         }
@@ -157,6 +165,9 @@ public:
     }
 
     int transcript(){
+        cout << "------------" << endl;
+        cout << "|Transcript|" << endl;
+        cout << "------------" << endl;
         conn = mysql_init ( NULL );
         mysql_real_connect(conn, "localhost", "root", "103103", "project3-nudb", 0, NULL, 0);
         char* sql = new char[500];
@@ -244,6 +255,10 @@ public:
     }
 
     int Enroll() {
+        cout << "--------" << endl;
+        cout << "|Enroll|" << endl;
+        cout << "--------" << endl;
+        cout << endl;
         cout<<"Do u want to enroll in some courses? Y/N"<<endl;
         string answer;
         cin>>answer;
@@ -387,6 +402,9 @@ public:
     }
 
     int withdraw() {
+        cout << "----------" << endl;
+        cout << "|Withdraw|" << endl;
+        cout << "----------" << endl;
         //print the courses the student has enrolled in with null grade
         char* sql = new char[1024];
         sprintf(sql, "select unitofstudy.uosname, transcript.uoscode, semester, year from transcript inner join unitofstudy using(uoscode) where grade is null and studid = '%s';", userId.c_str());
@@ -491,6 +509,9 @@ public:
     }
 
     int updateDetails(){
+        cout << "----------------" << endl;
+        cout << "|Update Details|" << endl;
+        cout << "----------------" << endl;
         char* sql = new char[1024];
         sprintf(sql, "select * from student where id = '%s'", userId.c_str());
         conn = mysql_init ( NULL );
